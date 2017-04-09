@@ -39,6 +39,33 @@ public class Game : MonoBehaviour {
     
   }
 
+  public void SelectAssault()
+  {
+    SelectByType(Selectable.Types.Assault);
+  }
+
+  public void SelectTanks()
+  {
+    SelectByType(Selectable.Types.Tank);
+  }
+
+  public void SelectJeeps()
+  {
+    SelectByType(Selectable.Types.Jeep);
+  }
+
+  public void SelectByType(Selectable.Types type)
+  {
+    DeselectAll();
+    foreach (Selectable t in MyArmy.GetComponentsInChildren<Selectable>())
+    {
+      if ( t.Type == type )
+      {
+        t.SendMessage("Select");
+      }
+    }
+  }
+
   public void DeselectAll()
   {
     foreach(Selectable t in Selection )
@@ -79,8 +106,6 @@ public class Game : MonoBehaviour {
     }
   }
 
-
-
   void MoveSelection(Vector3 v)
   {
     float xp = 0;
@@ -116,6 +141,25 @@ public class Game : MonoBehaviour {
       MainCamera.SetLookAt(Bounds.Center);
     }
   }
+
+  void Click(Vector3 v)
+  {
+    if ( Selection.Count >0 ) { 
+    NavMeshHit hit;
+    if (NavMesh.SamplePosition(v, out hit, 100, NavMesh.AllAreas))
+    {
+      MoveSelection(hit.position);
+    }
+    else {
+      SendMessage("DoCancel");
+    }
+    } else
+    {
+      MainCamera.SetLookAt(v);
+    }
+    //GetComponent<BuildMan>().MarkerAt(this.transform, hit.position);
+
+  }
   
 	
 	// Update is called once per frame
@@ -123,7 +167,7 @@ public class Game : MonoBehaviour {
 
     DoCamera();
 
-    Debug.Log(EventSystem.current.IsPointerOverGameObject());
+   // Debug.Log(EventSystem.current.IsPointerOverGameObject());
     if ( !EventSystem.current.IsPointerOverGameObject()) { 
       if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
       {

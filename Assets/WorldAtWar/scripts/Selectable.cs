@@ -7,7 +7,7 @@ using UnityEngine.EventSystems;
 public class Selectable : MonoBehaviour {
 
   public bool IsPlacing = false;
-  public enum Types { Barracks, VehicleFactory, Building, Assault };
+  public enum Types { Barracks, VehicleFactory, Building, Assault, Sniper, Jeep, Tank, Vehicle };
   public Types Type = Types.Building;
 
   void OnMouseUp()

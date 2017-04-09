@@ -17,10 +17,8 @@ public class CameraController : MonoBehaviour {
     TargetLookAt = v;
      TargetPosition = v + Offset;
     //this.transform.LookAt(v);    
-    transform.position = Vector3.SmoothDamp(transform.position, TargetPosition, ref CurrentVelocity, Speed);
-    Vector3 _direction = (TargetLookAt - transform.position).normalized;
-    Quaternion _lookRotation = Quaternion.LookRotation(_direction);
-    transform.rotation = Quaternion.Slerp(transform.rotation, _lookRotation, Time.deltaTime * RotationSpeed);
+    
+    
   }
   void Start () {
     TargetPosition = this.transform.position;
@@ -28,6 +26,10 @@ public class CameraController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-    
+    transform.position = Vector3.SmoothDamp(transform.position, TargetPosition, ref CurrentVelocity, Speed);
+
+    Vector3 _direction = (TargetLookAt - transform.position).normalized;
+    Quaternion _lookRotation = Quaternion.LookRotation(_direction);
+    transform.rotation = Quaternion.Slerp(transform.rotation, _lookRotation, Time.deltaTime * RotationSpeed);
   }
 }

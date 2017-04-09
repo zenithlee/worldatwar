@@ -5,15 +5,38 @@ using UnityEngine;
 public class BuildMan : MonoBehaviour {
 
   float TimeLeft = 5;
+  public GameObject Marker1;
   public GameObject Mine;
   public GameObject Barracks;
   public GameObject WarFactory;
   public GameObject Assault;
+  public GameObject Gunner;
+  public GameObject Jeep;
   public GameObject Tank;
+  
+  
+  public void MarkerAt(Transform parent, Vector3 v)
+  {
+    GameObject go = Instantiate(Marker1);
+    go.transform.parent = parent;
+    go.transform.position = v;
+  }
 
   public void BuildAssault()
   {
     GameObject go = Instantiate(Assault);    
+    SendMessage("PlaceMe", go);
+  }
+
+  public void BuildGunner()
+  {
+    GameObject go = Instantiate(Gunner);
+    SendMessage("PlaceMe", go);
+  }
+
+  public void BuildJeep()
+  {
+    GameObject go = Instantiate(Jeep);
     SendMessage("PlaceMe", go);
   }
 

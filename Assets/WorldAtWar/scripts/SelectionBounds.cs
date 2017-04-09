@@ -22,14 +22,16 @@ public class SelectionBounds : MonoBehaviour {
     if ( msg == "Accept")
     {
       foreach (Selectable t in Units)
-      {       
-          
-        t.Place();
+      {                 
+        t.Place();        
       }
     }
 
     if (msg == "Cancel")
     {
+
+      KillList.Clear();
+
       foreach (Selectable t in Units)
       {               
         KillList.Add(t);
@@ -107,7 +109,7 @@ public class SelectionBounds : MonoBehaviour {
     BottomRight = transform.Find("Handle/BottomRight").gameObject;
     BottomLeft = transform.Find("Handle/BottomLeft").gameObject;
 
-    AcceptButtons = transform.Find("Handle/AcceptCancel").gameObject;
+    AcceptButtons = transform.Find("Handle/TopRight/AcceptCancel").gameObject;
   }
 	
 	// Update is called once per frame

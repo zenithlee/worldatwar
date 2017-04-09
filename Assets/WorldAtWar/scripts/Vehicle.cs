@@ -7,6 +7,7 @@ public class Vehicle : MonoBehaviour {
 
   public Vector3 Target;
   NavMeshAgent Agent;
+  Animator ani;
   public float Speed = 10;
   public float AniSpeedMultiplier = 0.5f;  
 
@@ -35,6 +36,7 @@ public class Vehicle : MonoBehaviour {
     Agent = GetComponent<NavMeshAgent>();
     //Agent.Stop();
     Hugger = GetComponentInChildren<TerrainHug>();
+    ani = GetComponentInChildren<Animator>();
   }
 
   void OnDrawGizmos()
@@ -69,7 +71,10 @@ public class Vehicle : MonoBehaviour {
 
       if ( !LookingAtTarget())
       {
-        TargetWorldRotation = Quaternion.LookRotation(new Vector3(Agent.steeringTarget.x, 0, Agent.steeringTarget.z) - new Vector3(transform.position.x, 0, transform.position.z));
+        Vector3 delta = new Vector3(Agent.steeringTarget.x, 0, Agent.steeringTarget.z) - new Vector3(transform.position.x, 0, transform.position.z);
+        if ( delta.magnitude  > 0) { 
+          TargetWorldRotation = Quaternion.LookRotation(delta);
+        }
         transform.rotation = Quaternion.RotateTowards(transform.rotation, TargetWorldRotation, Agent.angularSpeed* Time.deltaTime);
         Agent.speed = 0;
       }
@@ -89,15 +94,13 @@ public class Vehicle : MonoBehaviour {
 
     //Debug.Log(Agent.velocity.magnitude);
     if ( Agent.velocity.magnitude > 0.2 )
-    {
-      Animator ani = GetComponent<Animator>();
+    {      
       ani.SetBool("moving", true);
       ani.SetBool("idling", false);
       ani.speed = Agent.velocity.magnitude * AniSpeedMultiplier;      
     }
     else
-    {
-      Animator ani = GetComponent<Animator>();      
+    {     
       ani.SetBool("moving", false);
       ani.SetBool("idling", true);
       ani.speed = 0.9f+Random.value;
