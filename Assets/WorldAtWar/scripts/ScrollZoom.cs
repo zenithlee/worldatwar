@@ -11,7 +11,7 @@ public class ScrollZoom : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-    float Scroll = Input.GetAxis("Mouse ScrollWheel") * 5;
+    float Scroll = Input.GetAxis("Mouse ScrollWheel") * 15;
     if ( Scroll != 0 )
     {
       //this.transform.Translate( new Vector3(0,0,Scroll));

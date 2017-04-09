@@ -44,13 +44,7 @@ public class Vehicle : MonoBehaviour {
 
   protected bool LookingAtTarget()
   {
-    /*TargetWorldRotation = Quaternion.LookRotation(new Vector3(Target.x, 0, Target.z) - new Vector3(transform.position.x,0, transform.position.z));  
-    float Dot = Quaternion.Dot(TargetWorldRotation, transform.rotation);
-    Debug.Log(Mathf.Abs(Dot));
-    if (Mathf.Abs(Dot) > 0.99) return true;
-    return false;*/
-    float Dot = Vector3.Angle(transform.forward, new Vector3(Agent.steeringTarget.x, 0, Agent.steeringTarget.z) - new Vector3(transform.position.x, 0, transform.position.z));
-    //Debug.Log(Dot);
+    float Dot = Vector3.Angle(transform.forward, new Vector3(Agent.steeringTarget.x, 0, Agent.steeringTarget.z) - new Vector3(transform.position.x, 0, transform.position.z));   
     if (Mathf.Abs(Dot) < 25) return true;
     return false;
   }

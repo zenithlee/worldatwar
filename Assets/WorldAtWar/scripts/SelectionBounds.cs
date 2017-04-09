@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class SelectionBounds : MonoBehaviour {
 
-  List<Selectable> Units;
+  List<Selectable> Units = new List<Selectable>();
+  List<Selectable> KillList = new List<Selectable>();
   public GameObject SelectionHandle;
 
   public GameObject TopLeft;
@@ -12,7 +13,35 @@ public class SelectionBounds : MonoBehaviour {
   public GameObject BottomLeft;
   public GameObject BottomRight;
 
+  public GameObject AcceptButtons;
+
   public Vector3 Center ;
+
+  public void ButtonPress(string msg)
+  {
+    if ( msg == "Accept")
+    {
+      foreach (Selectable t in Units)
+      {       
+          
+        t.Place();
+      }
+    }
+
+    if (msg == "Cancel")
+    {
+      foreach (Selectable t in Units)
+      {               
+        KillList.Add(t);
+      }
+
+      foreach( Selectable t in KillList)
+      {
+        Units.Remove(t);
+        GameObject.Destroy(t.gameObject, 0.1f);
+      }
+    }
+  }
 
   public void SetUnits(List<Selectable> _units)
   {
@@ -21,6 +50,8 @@ public class SelectionBounds : MonoBehaviour {
 
   public void CalculateSelectionBounds()
   {
+    bool IsPlacing = false;
+
     if (Units.Count == 0)
     {
       SelectionHandle.SetActive(false);
@@ -29,11 +60,17 @@ public class SelectionBounds : MonoBehaviour {
     {
       SelectionHandle.SetActive(true);
       Center = new Vector3(0, 0, 0);
-      Vector3 tl = new Vector3(999, 999, 999);
+      Vector3 tl = new Vector3(999, 999, 999);     
+
       foreach (Selectable t in Units)
       {
         Center += t.transform.position;
         tl = Vector3.Min(t.transform.position, tl);
+
+        if ( t.IsPlacing == true )
+        {
+          IsPlacing = true;
+        }
       }
 
 
@@ -58,7 +95,8 @@ public class SelectionBounds : MonoBehaviour {
       BottomLeft.transform.position = b.center + new Vector3(b.extents.x, yp, -b.extents.z);
       BottomLeft.transform.position = new Vector3(BottomLeft.transform.position.x, yp, BottomLeft.transform.position.z);
     }
-
+    
+    AcceptButtons.SetActive(IsPlacing);
   }
 
   // Use this for initialization
@@ -68,6 +106,8 @@ public class SelectionBounds : MonoBehaviour {
     TopRight = transform.Find("Handle/TopRight").gameObject;
     BottomRight = transform.Find("Handle/BottomRight").gameObject;
     BottomLeft = transform.Find("Handle/BottomLeft").gameObject;
+
+    AcceptButtons = transform.Find("Handle/AcceptCancel").gameObject;
   }
 	
 	// Update is called once per frame

@@ -18,6 +18,8 @@ public class Game : MonoBehaviour {
   enum States { Menu, Game, Placing };
   States State = States.Game;
 
+  public float MinimumMoveDistance = 6;
+
   // Use this for initialization
   void Start()
   {
@@ -48,8 +50,7 @@ public class Game : MonoBehaviour {
   }
 
   void SelectMe(Selectable t)
-  {    
-    //DeselectAll();
+  {        
     Selection.Add(t);
   }
 
@@ -59,19 +60,20 @@ public class Game : MonoBehaviour {
 
     RaycastHit hit;
     
-    Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+    Ray ray = Camera.main.ScreenPointToRay(new Vector3(Screen.width / 2.5f, Screen.height / 2, 0));
     if (GameTerrain.GetComponent<Collider>().Raycast(ray, out hit, Mathf.Infinity))
     {
-      NavMeshAgent nm = go.GetComponent<NavMeshAgent>();
-      float r = go.GetComponent<Selectable>().GetRadius() * 5;
+      NavMeshAgent nm = go.GetComponent<NavMeshAgent>();      
       if (nm != null)
       {
-       
+        float r = go.GetComponent<Selectable>().GetRadius() * 5;
         go.GetComponent<NavMeshAgent>().Warp(hit.point + new Vector3(Random.value*r, 0, Random.value*r));
       }
       else
       {
-        go.transform.position = hit.point + new Vector3(Random.value * r, 0, Random.value * r);
+        go.GetComponent<Selectable>().IsPlacing = true;
+        float r = go.GetComponent<Selectable>().GetRadius() * 2;
+        go.transform.position = hit.point + new Vector3(Random.value * r-r/2, 0, Random.value * r - r/2);
       }
       
     }
@@ -85,7 +87,17 @@ public class Game : MonoBehaviour {
     float zp = 0;
     float cut = Selection.Count / 2;
     foreach (Selectable t in Selection)
-    {
+    {      
+      if ((t.GetComponent<Building>()!=null) && (t.IsPlacing == false))
+      {
+        continue;
+      }
+
+      if (Vector3.Distance(v, t.transform.position) < t.GetRadius()*2)
+      {
+        continue;
+      }
+
       float r = t.GetRadius() * 4;
       t.SetTarget(v + new Vector3(xp, 0, zp));
       xp+=r;

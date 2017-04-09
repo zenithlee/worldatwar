@@ -11,6 +11,11 @@ public class AudioNode : MonoBehaviour {
   public AudioClip Move;
   public AudioClip Action;  
 
+  void DoPlace()
+  {
+    Play(AckSound);
+  }
+
   void DoSelect()
   {
     Play(SelectSound);

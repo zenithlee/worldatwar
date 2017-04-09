@@ -7,6 +7,7 @@ public class BuildMan : MonoBehaviour {
   float TimeLeft = 5;
   public GameObject Mine;
   public GameObject Barracks;
+  public GameObject WarFactory;
   public GameObject Assault;
   public GameObject Tank;
 
@@ -25,6 +26,13 @@ public class BuildMan : MonoBehaviour {
   public void BuildBarracks()
   {
     GameObject go = Instantiate(Barracks);    
+    SendMessage("PlaceMe", go);
+    SendMessage("SelectMe", go.GetComponent<Selectable>());
+  }
+
+  public void BuildWarFactory()
+  {
+    GameObject go = Instantiate(WarFactory);
     SendMessage("PlaceMe", go);
   }
 

@@ -5,7 +5,10 @@ using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
 public class Selectable : MonoBehaviour {
-  
+
+  public bool IsPlacing = false;
+  public enum Types { Barracks, VehicleFactory, Building, Assault };
+  public Types Type = Types.Building;
 
   void OnMouseUp()
   {
@@ -26,8 +29,14 @@ public class Selectable : MonoBehaviour {
     else
     {
       BoxCollider bc = GetComponent<BoxCollider>();
-      return bc.bounds.size.magnitude;      
+      return bc.bounds.extents.x;      
     }    
+  }
+
+  public void Place()
+  {
+    IsPlacing = false;
+    SendMessage("DoPlace");
   }
 
   public void SetTarget(Vector3 v)
