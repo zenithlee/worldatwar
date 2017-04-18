@@ -12,11 +12,11 @@ public class UIMan : MonoBehaviour {
   void SelectMe( Selectable t)
   {
     if (t.IsPlacing == false) { 
-      if ( t.Type == Selectable.Types.Barracks)
+      if ( t.Data.Type == Types.ConstructionTypes.Barracks)
       {
         ShowBarracks();
       }
-      if (t.Type == Selectable.Types.VehicleFactory)
+      if (t.Data.Type == Types.ConstructionTypes.VehicleFactory)
       {
         ShowVehicleFactory();
       }

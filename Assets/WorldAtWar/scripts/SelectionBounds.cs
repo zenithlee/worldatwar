@@ -109,7 +109,7 @@ public class SelectionBounds : MonoBehaviour {
     BottomRight = transform.Find("Handle/BottomRight").gameObject;
     BottomLeft = transform.Find("Handle/BottomLeft").gameObject;
 
-    AcceptButtons = transform.Find("Handle/TopRight/AcceptCancel").gameObject;
+    AcceptButtons = transform.Find("Handle/TopRight/AcceptCancel").gameObject;    
   }
 	
 	// Update is called once per frame

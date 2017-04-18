@@ -21,11 +21,16 @@ public class CameraController : MonoBehaviour {
     
   }
   void Start () {
-    TargetPosition = this.transform.position;
+    //TargetPosition = this.transform.position;
+  }
+
+  void Update()
+  {
+    transform.position = Vector3.SmoothDamp(transform.position, TargetPosition, ref CurrentVelocity, Speed);
   }
 	
 	// Update is called once per frame
-	void Update () {
+	void Update2 () {
     transform.position = Vector3.SmoothDamp(transform.position, TargetPosition, ref CurrentVelocity, Speed);
 
     Vector3 _direction = (TargetLookAt - transform.position).normalized;

@@ -1,14 +1,28 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
+[Serializable]
+public class SelectableData
+{
+  public Types.ConstructionTypes Type = Types.ConstructionTypes.Building;
+  public int Team = 0;
+}
+
 public class Selectable : MonoBehaviour {
 
-  public bool IsPlacing = false;
-  public enum Types { Barracks, VehicleFactory, Building, Assault, Sniper, Jeep, Tank, Vehicle };
-  public Types Type = Types.Building;
+  public SelectableData Data = new SelectableData();
+
+  public bool IsPlacing = false;    
+  public Vector3 SnapSize = Vector3.one;  
+
+  void DoDie()
+  {
+    SendMessageUpwards("KillMe", this);
+  }
 
   void OnMouseUp()
   {
@@ -42,6 +56,10 @@ public class Selectable : MonoBehaviour {
   public void SetTarget(Vector3 v)
   {
     SendMessage("DoSetTarget", v);
+  }
+
+  public void MoveTo(Vector3 v) {
+    SendMessage("DoMove", v);
   }
 
   public void Deselect()

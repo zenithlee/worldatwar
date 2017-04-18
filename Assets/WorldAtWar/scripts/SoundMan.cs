@@ -24,6 +24,10 @@ public class SoundMan : MonoBehaviour {
     _AudioSource.Play();
   }
 
+  void PlaceMe(GameObject go)
+  {
+    Play("Beep");
+  }
   public void DoCancel()
   {
     Play("Beep");

@@ -4,11 +4,21 @@ using UnityEngine;
 
 public class Building : MonoBehaviour {
 
- 
+  public float PowerRequired = 1;
+
+ public void DoPlace()
+  {
+
+  }
 
   public void DoSelect()
   {
 
+  }
+
+  public void DoMove(Vector3 v)
+  {
+    this.transform.position = v;
   }
 
   public void DoSetTarget( Vector3 v)

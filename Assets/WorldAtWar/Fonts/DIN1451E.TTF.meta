@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 18734b29c0abad048b0eb58a46a52b1d
+timeCreated: 1492115116
+licenseType: Free
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: DIN 1451 Engschrift
+  fontNames:
+  - DIN 1451 Engschrift
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
