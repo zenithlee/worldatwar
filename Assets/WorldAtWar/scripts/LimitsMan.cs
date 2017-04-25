@@ -1,20 +1,51 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class LimitsMan : MonoBehaviour {
 
+  [SerializeField]
   public Dictionary<Types.ConstructionTypes, int> Limits = new Dictionary<Types.ConstructionTypes, int>();
-  public int MaxBase = 1;
-  public float BaseBuildTime = 3;
+  public Dictionary<Types.ConstructionTypes, Button> Buttons = new Dictionary<Types.ConstructionTypes, Button>();
 
-  public int MaxBarracks = 1;
+  public Button UI_BaseButton;
+  public Button UI_MineButton;
+  public Button UI_PowerStationButton;
+  public Button UI_BarracksButton;
+  public Button UI_WallButton;
+
+  public Button UI_TankButton;
+  public Button UI_JeepButton;
+
+  // Use this for initialization
+  void Start()
+  {
+    Limits[Types.ConstructionTypes.Base] = 1;
+    Limits[Types.ConstructionTypes.Mine] = 2;
+    Limits[Types.ConstructionTypes.PowerStation] = 5;
+    Limits[Types.ConstructionTypes.Barracks] = 2;
+    Limits[Types.ConstructionTypes.Wall] = 20;
+
+    Limits[Types.ConstructionTypes.Tank] = 5;
+    Limits[Types.ConstructionTypes.Jeep] = 5;
+
+
+    Buttons[Types.ConstructionTypes.Base] = UI_BaseButton;
+    Buttons[Types.ConstructionTypes.Mine] = UI_MineButton;
+    Buttons[Types.ConstructionTypes.PowerStation] = UI_PowerStationButton;
+    Buttons[Types.ConstructionTypes.Barracks] = UI_BarracksButton;
+    Buttons[Types.ConstructionTypes.Wall] = UI_WallButton;
+
+    Buttons[Types.ConstructionTypes.Tank] = UI_TankButton;
+    Buttons[Types.ConstructionTypes.Jeep] = UI_JeepButton;
+  }
 
   public int CountOf(Types.ConstructionTypes t)
   {
 
     Selectable[] items = transform.GetComponentsInChildren<Selectable>();
-    int Count = 0;
+    int Count = 1;
     foreach( Selectable s in items)
     {
       if (s.Data.Type == t) Count++;
@@ -22,21 +53,28 @@ public class LimitsMan : MonoBehaviour {
     return Count;
   }
 
-  public bool CanIBuild(Types.ConstructionTypes type)
+  public bool CheckBuild(Types.ConstructionTypes type)
   {
-    if ( type == Types.ConstructionTypes.Base)
+    if ( CountOf(type) > Limits[type])
     {
-      if (CountOf(Types.ConstructionTypes.Base) < MaxBase)
+      SetUI(type, false);
+      return false;
+    }
+
+    SetUI(type, true);
+    return true;   
+  }
+
+  void SetUI(Types.ConstructionTypes type, bool b)
+  {
+    if ( Buttons.ContainsKey(type)) {
+      if (Buttons[type] != null)
       {
-        return true;
+        Buttons[type].interactable = b;
       }
     }
-    return false;
   }
-	// Use this for initialization
-	void Start () {
-		
-	}
+	
 	
 	// Update is called once per frame
 	void Update () {

@@ -126,9 +126,11 @@ public class Game : MonoBehaviour {
   }
 
   void PlaceMe(GameObject go)
-  {    
-    SelectMe(go.GetComponent<Selectable>());
+  {
+    Selectable gs = go.GetComponent<Selectable>();
+    SelectMe(gs);
     cursor.SetState(Types.SelectionState.BuildAt);
+    
   }
 
   void MoveMe(GameObject go, Vector3 t)
@@ -141,7 +143,11 @@ public class Game : MonoBehaviour {
     Instantiate(Explosion, go.transform.position, go.transform.rotation);
     Selection.Remove(go.GetComponent<Selectable>());
     Bounds.SetUnits(Selection);
+    go.transform.parent = null;
+    MyTeam.GetComponent<LimitsMan>().CheckBuild(go.Data.Type);
+
     GameObject.Destroy(go.gameObject, 0.5f);
+
   }
 
   void MoveSelection(Vector3 v)

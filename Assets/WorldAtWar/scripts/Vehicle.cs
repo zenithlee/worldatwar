@@ -20,6 +20,7 @@ public class Vehicle : MonoBehaviour {
 
   Quaternion TargetWorldRotation;
 
+  public bool IsScout = false;
   public float ScoutTimer = 5;
   public float ScoutTime = 5;
   public float ScoutRadius = 20;
@@ -59,7 +60,9 @@ public class Vehicle : MonoBehaviour {
     //State = States.Move;
     Agent.SetDestination(Target);
     ani.SetBool("attack", false);
-    SetState(States.Move);    
+    if ( State != States.Scout ) { 
+      SetState(States.Move);
+    }
   }
 
   public void DoSelect()
@@ -158,7 +161,10 @@ public class Vehicle : MonoBehaviour {
 
     if ( EnemyFound == false )
     {
-      SetState(States.Idle);      
+      if (State != States.Scout)
+      {
+        SetState(States.Idle);
+      }
     } else
     {
       if (State == States.Attack)
@@ -191,7 +197,7 @@ public class Vehicle : MonoBehaviour {
   void Update () {
 
     CheckIdle();
-    if ( State == States.Scout )
+    if ( IsScout && State == States.Idle )
     {
       DoScout();
     }

@@ -18,10 +18,16 @@ public class BuildMan : MonoBehaviour {
 
   public void BuildBase()
   {    
-    if ( Limits.CanIBuild( Types.ConstructionTypes.Base)) { 
+    //if ( Limits.CheckBuild( Types.ConstructionTypes.Base)) { 
       GameObject go = Instantiate(MyTeam.BaseProto);
       SendMessage("PlaceMe", go);
-    }
+    //}
+  }
+
+  public void BuildMine()
+  {
+    GameObject go = Instantiate(MyTeam.MineProto);
+    SendMessage("PlaceMe", go);
   }
 
   public void MarkerAt(Transform parent, Vector3 v)
@@ -92,11 +98,7 @@ public class BuildMan : MonoBehaviour {
     SendMessage("PlaceMe", go);
   }
 
-  public void BuildMine()
-  {
-    GameObject go = Instantiate(MyTeam.MineProto);    
-    SendMessage("PlaceMe", go);
-  }
+  
 
   public void BuildContainer()
   {
@@ -106,7 +108,9 @@ public class BuildMan : MonoBehaviour {
 
   void PlaceMe(GameObject go)
   {
+    Selectable gs = go.GetComponent<Selectable>();
     go.transform.parent = MyArmy.transform;
+    MyTeam.GetComponent<LimitsMan>().CheckBuild(gs.Data.Type);
 
     RaycastHit hit;
 
@@ -116,14 +120,14 @@ public class BuildMan : MonoBehaviour {
       NavMeshAgent nm = go.GetComponent<NavMeshAgent>();
       if (nm != null)
       {
-        float r = go.GetComponent<Selectable>().GetRadius() * 5;
+        float r = gs.GetRadius() * 5;
         Vector3 pos = Tools.GetSnap(go, hit.point + new Vector3(Random.value * r, 0, Random.value * r));
         go.GetComponent<NavMeshAgent>().Warp(pos);
       }
       else
       {
-        go.GetComponent<Selectable>().IsPlacing = true;
-        float r = go.GetComponent<Selectable>().GetRadius() * 2;
+        gs.IsPlacing = true;
+        float r = gs.GetRadius() * 2;
         Vector3 pos = Tools.GetSnap(go, hit.point + new Vector3(Random.value * r, 0, Random.value * r));
         go.transform.position = pos;
       }
