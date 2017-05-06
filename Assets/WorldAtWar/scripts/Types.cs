@@ -10,8 +10,11 @@ public class Types {
     Infantry, Assault, Gunner, Sniper, Engineer, Medic, Civilian,
     Vehicle, MobileBase, Jeep, Tank, LargeTank, SmallTank, RocketLauncher, APC, CargoTruck, BridgeBuilder, Harvester,
     Aircraft, Helicopter, AttackHelicopter, FighterPlane, Bomber,
-    Ship, Warship, Boat, PatrolBoat, AttackBoat, Carrier};
+    Ship, Warship, Boat, PatrolBoat, AttackBoat, Carrier,
+    Flag, Marker, Beacon};
   public enum GameState { Loading, Menu, Playing };
   public enum SelectionState { None, BuildAt, MoveTo, Attack }
+
+  public Dictionary<ConstructionTypes, Object> TypeObjectMappings = new Dictionary<ConstructionTypes, Object>();
   
 }

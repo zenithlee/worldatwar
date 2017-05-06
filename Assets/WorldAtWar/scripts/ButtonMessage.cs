@@ -8,7 +8,7 @@ public class ButtonMessage : MonoBehaviour {
 	
   void OnMouseDown()
   {
-    Debug.Log("Pressed");
+    //Debug.Log("Pressed");
     SendMessageUpwards("ButtonPress", Message);
   }
 

@@ -7,309 +7,369 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
-[Serializable]
-public class GameData
+namespace WW
 {
-  [SerializeField]
-  public float Version = 1.0f;
-}
 
-public class Game : MonoBehaviour {
-  GameData Data = new GameData();
-  public List<Selectable> Selection = new List<Selectable>();
-  public GameObject GameTerrain;
-  public GameObject MyArmy;
-  public Team MyTeam;
-  public Cursor cursor;
-  public GameObject MapBlip; // a ping on the map, object self destructs quickly
-  public GameObject Explosion;
-
-  SelectionBounds Bounds;
-
-  enum CameraModes { Follow };
-  CameraModes CameraMode = CameraModes.Follow;
-  public CameraController MainCamera;
-
-  enum States { Menu, Game, Placing };
-  States State = States.Game;
-
-  public float MinimumMoveDistance = 6;
-
-  // Use this for initialization
-  void Start()
+  [Serializable]
+  public class GameData
   {
-    Bounds = transform.GetComponentInChildren<SelectionBounds>();
-    cursor = transform.GetComponentInChildren<Cursor>();
-    MainCamera.SetLookAt(MyArmy.transform.Find("Flag").transform.position);
+    [SerializeField]
+    public float Version = 1.0f;
   }
 
-  void Save()
+  public class Game : MonoBehaviour
   {
-    string GameName = "SavedGames" + "/SavedGame.dat";
-    Directory.CreateDirectory("SavedGames");
-    
-    BinaryFormatter bf = new BinaryFormatter();       
-    FileStream file = new FileStream(GameName, FileMode.Create);
-    
-    //save our data
-    bf.Serialize(file, Data);
+    GameData Data = new GameData();
+    public List<Selectable> Selection = new List<Selectable>();
+    public GameObject GameTerrain;
+    public GameObject MyArmy;
+    public Team MyTeam;
+    public Cursor cursor;
+    public GameObject MapBlip; // a ping on the map, object self destructs quickly
+    public GameObject Explosion;
 
-    Transform map = transform.Find("Map");
-    Team[] ta = map.GetComponentsInChildren<Team>();
-    //save each team data
-    foreach( Team t in ta)
+    SelectionBounds Bounds;
+
+    enum CameraModes { Follow };
+    CameraModes CameraMode = CameraModes.Follow;
+    public CameraController MainCamera;
+
+    enum States { Menu, Game, Placing };
+    States State = States.Game;
+
+    public float MinimumMoveDistance = 6;
+
+    InputMan inputMan;
+
+    // Use this for initialization
+    void Start()
     {
-      bf.Serialize(file, t.Data);
+      Bounds = transform.GetComponentInChildren<SelectionBounds>();
+      cursor = transform.GetComponentInChildren<Cursor>();
+      MainCamera.SetLookAt(MyArmy.transform.Find("Flag").transform.position);
+      inputMan = transform.GetComponent<InputMan>();
+      InvokeRepeating("NotifySelection", 1.1f, 1.1f);
     }
-    
-    file.Close();
-    Debug.Log("Saved:" + GameName);
-  }
 
-  public void SelectAll()
-  {
-    DeselectAll();
-    foreach (Selectable t in MyArmy.GetComponentsInChildren<Selectable>())
+    void NotifySelection()
     {
-      //t.GetComponent<AudioNode>().
-      if ( t.GetComponent<Vehicle>() != null) { 
-        t.SendMessage("Select");
-      }
-    }    
-  }
+      GetComponent<UIMan>().SetSelection(Selection);
+    }
 
-  public void SelectAssault()
-  {
-    SelectByType(Types.ConstructionTypes.Assault);
-    SelectByType(Types.ConstructionTypes.Gunner);
-    SelectByType(Types.ConstructionTypes.Sniper);
-  }
-
-  public void SelectTanks()
-  {
-    SelectByType(Types.ConstructionTypes.Tank);
-  }
-
-  public void SelectJeeps()
-  {
-    SelectByType(Types.ConstructionTypes.Jeep);
-  }
-
-  public void SelectByType(Types.ConstructionTypes type)
-  {
-    DeselectAll();
-    foreach (Selectable t in MyArmy.GetComponentsInChildren<Selectable>())
+    void Save()
     {
-      if ( t.Data.Type == type )
+      string GameName = "SavedGames" + "/SavedGame.dat";
+      Directory.CreateDirectory("SavedGames");
+
+      BinaryFormatter bf = new BinaryFormatter();
+      FileStream file = new FileStream(GameName, FileMode.Create);
+
+      //save our data
+      bf.Serialize(file, Data);
+
+      Transform map = transform.Find("Map");
+      Team[] ta = map.GetComponentsInChildren<Team>();
+      //save each team data
+      foreach (Team t in ta)
       {
-        t.SendMessage("Select");
-      }
-    }
-  }
-
-  public void DeselectAll()
-  {
-    foreach(Selectable t in Selection )
-    {
-      t.Deselect();
-      //t.GetComponent<Vehicle>().Deselect();
-    }
-    Selection.Clear();
-  }
-
-  void SelectMe(Selectable t)
-  {
-    if ( t.Data.Team == MyTeam.Data.TeamID ) { 
-      Selection.Add(t);
-      cursor.SetState(Types.SelectionState.MoveTo);
-    }
-  }
-
-  void PlaceMe(GameObject go)
-  {
-    Selectable gs = go.GetComponent<Selectable>();
-    SelectMe(gs);
-    cursor.SetState(Types.SelectionState.BuildAt);
-    
-  }
-
-  void MoveMe(GameObject go, Vector3 t)
-  {
-    go.GetComponent<Selectable>().SetTarget(t);
-  }
-
-  void KillMe(Selectable go)
-  {
-    Instantiate(Explosion, go.transform.position, go.transform.rotation);
-    Selection.Remove(go.GetComponent<Selectable>());
-    Bounds.SetUnits(Selection);
-    go.transform.parent = null;
-    MyTeam.GetComponent<LimitsMan>().CheckBuild(go.Data.Type);
-
-    GameObject.Destroy(go.gameObject, 0.5f);
-
-  }
-
-  void MoveSelection(Vector3 v)
-  {
-    float xp = 0;
-    float zp = 0;
-    float cut = Mathf.Sqrt(Selection.Count);
-    foreach (Selectable t in Selection)
-    {      
-      if ((t.GetComponent<Building>()!=null) && (t.IsPlacing == false))
-      {
-        continue;
-      }
-      if ((t.GetComponent<Building>() != null) && (t.IsPlacing == true))
-      {
-        Vector3 bpos = Tools.GetSnap(t.gameObject, v);
-        t.MoveTo(bpos);
-        continue;
+        bf.Serialize(file, t.Data);
       }
 
-      if (Vector3.Distance(v, t.transform.position) < t.GetRadius()*2)
+      file.Close();
+      Debug.Log("Saved:" + GameName);
+    }
+
+    public void SelectAll()
+    {
+      DeselectAll();
+      foreach (Selectable t in MyArmy.GetComponentsInChildren<Selectable>())
       {
-        continue;
+        //t.GetComponent<AudioNode>().
+        if (t.GetComponent<Vehicle>() != null)
+        {
+          t.SendMessage("Select");
+        }
       }
+    }
 
+    public void SelectAssault()
+    {
+      SelectByType(Types.ConstructionTypes.Assault);
+      SelectByType(Types.ConstructionTypes.Gunner);
+      SelectByType(Types.ConstructionTypes.Sniper);
+    }
 
-      float r = t.GetRadius() * 3;
+    public void SelectTanks()
+    {
+      SelectByType(Types.ConstructionTypes.Tank);
+    }
 
-      Vector3 pos = Tools.GetSnap(t.gameObject, v + new Vector3(xp-cut/2*r, 0, zp-cut/2*r));
-      t.SetTarget(pos);      
+    public void SelectJeeps()
+    {
+      SelectByType(Types.ConstructionTypes.Jeep);
+    }
 
-      xp +=r;
-      if ( xp  > cut*r )
+    public void SelectByType(Types.ConstructionTypes type)
+    {
+      DeselectAll();
+      foreach (Selectable t in MyArmy.GetComponentsInChildren<Selectable>())
       {
-        xp = 0;
-        zp += r;
+        if (t.Data.Type == type)
+        {
+          t.SendMessage("Select");
+        }
       }
-    }  
-  }
-
-  void DoCamera()
-  {
-    //Camera c = MainCamera.GetComponent<Camera>();
-    if ( Selection.Count > 0 ) {
-      MainCamera.SetLookAt(Bounds.Center);
     }
-  }
 
-  void Click(Vector3 v)
-  {
-    if ( Selection.Count >0 ) { 
-    NavMeshHit hit;
-    if (NavMesh.SamplePosition(v, out hit, 100, NavMesh.AllAreas))
+    public void DeselectAll()
     {
-      MoveSelection(hit.position);
-    }
-    else {
-      SendMessage("DoCancel");
-    }
-    } else
-    {
-      MainCamera.SetLookAt(v);
-    }
-    //GetComponent<BuildMan>().MarkerAt(this.transform, hit.position);
-
-  }
-
-  void AddBlip( Vector3 v)
-  {
-    GameObject go = Instantiate(MapBlip, v, Quaternion.identity);
-    go.GetComponent<MapBlip>().Kill();
-  }
-
-  void CheckCursor()
-  {
-    RaycastHit hit;
-    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    if (Physics.Raycast(ray, out hit, Mathf.Infinity))
-    {
-     // Debug.Log(hit.transform.name);
-      cursor.SetPosition(hit.point);
-
-      if ( hit.transform == GameTerrain.transform )
+      foreach (Selectable t in Selection)
       {
+        t.Deselect();
+        //t.GetComponent<Vehicle>().Deselect();
+      }
+      Selection.Clear();
+    }
+
+    void SelectMe(Selectable t)
+    {
+      if (t.Data.Team == MyTeam.Data.Team)
+      {
+        Selection.Add(t);
         cursor.SetState(Types.SelectionState.MoveTo);
       }
+    }
+
+    void PlaceMe(GameObject go)
+    {
+      Selectable gs = go.GetComponent<Selectable>();
+      if (gs.Data.Team == MyTeam.Data.Team)
+      {
+        SelectMe(gs);
+        cursor.SetState(Types.SelectionState.BuildAt);
+      }
+
+    }
+
+    void MoveMe(GameObject go, Vector3 t)
+    {
+      go.GetComponent<Selectable>().SetTarget(t);
+    }
+
+    void KillMe(Selectable go)
+    {
+      Instantiate(Explosion, go.transform.position, go.transform.rotation);
+      Selection.Remove(go.GetComponent<Selectable>());
+      Bounds.SetUnits(Selection);
+      go.transform.parent = null;
+      MyTeam.GetComponent<LimitsMan>().CheckBuild(go.Data.Type);
+
+      GameObject.Destroy(go.gameObject, 0.5f);
+    }
+
+    public void KillSelected()
+    {
+      List<Selectable> tempList = new List<Selectable>();
+      foreach (Selectable s in Selection)
+      {
+        tempList.Add(s);
+      }
+
+      foreach ( Selectable s in tempList)
+      {
+        KillMe(s);
+      }
+    }
+
+    public void RepairSelected()
+    {
+      foreach (Selectable s in Selection)
+      {
+        MyTeam.RepairUnit(s);
+      }
+
+      MyTeam.GetComponent<LimitsMan>().RegisterTransaction(); 
+    }
+
+    bool IsSpaceOccupied(Selectable s, Vector3 v)
+    {
+      float rr = s.GetRadius()/2.0f;
+      RaycastHit[] hits = (Physics.BoxCastAll(v, new Vector3(rr, rr, rr), Vector3.right));
+
+      bool occupied = false;
+
+      foreach( RaycastHit hit in hits )
+      {
+        if (hit.transform == GameTerrain.transform) continue;
+        else
+        if (hit.transform == s.transform) continue;
+        else
+        {
+          occupied = true;
+        }
+      }
+      return occupied;
+    }
+
+    void MoveSelection(Vector3 v)
+    {
+      float xp = 0;
+      float zp = 0;
+      float cut = Mathf.Sqrt(Selection.Count);
+      foreach (Selectable t in Selection)
+      {
+        if ((t.GetComponent<Building>() != null) && (t.IsPlacing == false))
+        {
+          continue;
+        }
+        if ((t.GetComponent<Building>() != null) && (t.IsPlacing == true))
+        {
+          Vector3 bpos = Tools.GetSnapXZ(t.gameObject, v);
+          if ( !IsSpaceOccupied( t, bpos)) { 
+          t.MoveTo(bpos);
+            }
+          continue;
+        }
+
+        if (Vector3.Distance(v, t.transform.position) < t.GetRadius() * 2)
+        {
+          continue;
+        }
+
+
+        float r = t.GetRadius() * 3;
+
+        Vector3 pos = Tools.GetSnap(t.gameObject, v + new Vector3(xp - cut / 2 * r, 0, zp - cut / 2 * r));
+        t.SetTarget(pos);
+
+        xp += r;
+        if (xp > cut * r)
+        {
+          xp = 0;
+          zp += r;
+        }
+      }
+    }
+
+    void DoCamera()
+    {
+      //Camera c = MainCamera.GetComponent<Camera>();
+      /*if (Selection.Count > 0)
+      {
+        MainCamera.SetLookAt(Bounds.Center);
+      }
+      */
+    }
+
+    void Click(Vector3 v)
+    {
+      if (Selection.Count > 0)
+      {
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(v, out hit, 100, NavMesh.AllAreas))
+        {
+          MoveSelection(hit.position);
+        }
+        else
+        {
+          SendMessage("DoCancel");
+        }
+      }
       else
-      {      
-        Selectable s = hit.transform.GetComponent<Selectable>();
-        if (s != null) {
-          if (MyTeam.Data.TeamID != s.Data.Team)
+      {
+        MainCamera.SetLookAt(v);
+      }
+      //GetComponent<BuildMan>().MarkerAt(this.transform, hit.position);
+
+    }
+
+    void AddBlip(Vector3 v)
+    {
+      GameObject go = Instantiate(MapBlip, v, Quaternion.identity);
+      go.GetComponent<MapBlip>().Kill();
+    }
+
+    void ClickAt( Vector3 v )
+    {
+
+    }
+
+    void CheckCursor()
+    {
+      RaycastHit hit;
+      Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+      if (Physics.Raycast(ray, out hit, Mathf.Infinity))
+      {
+        // Debug.Log(hit.transform.name);
+        cursor.SetPosition(hit.point);
+
+        if (hit.transform == GameTerrain.transform)
+        {
+          cursor.SetState(Types.SelectionState.MoveTo);
+        }
+        else
+        {
+          Selectable s = hit.transform.GetComponent<Selectable>();
+          if (s != null)
           {
-            cursor.SetState(Types.SelectionState.Attack);
-          }
-          else
-          {
-            cursor.SetState(Types.SelectionState.None);
+            if (MyTeam.Data.Team != s.Data.Team)
+            {
+              cursor.SetState(Types.SelectionState.Attack);
+            }
+            else
+            {
+              cursor.SetState(Types.SelectionState.None);
+            }
           }
         }
       }
     }
-  }
 
-  void CheckDrag()
-  {
-
-  }
-
-  void CheckKeys()
-  {
-    if ( Input.GetKeyUp(KeyCode.S))
+    void CheckDrag()
     {
-      Save();
-    }
-  }
-
-  // Update is called once per frame
-  void Update () {
-
-    DoCamera();
-    CheckCursor();
-    CheckDrag();
-    CheckKeys();
-
-    RaycastHit hit;
-    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    if (GameTerrain.GetComponent<Collider>().Raycast(ray, out hit, Mathf.Infinity))
-    {
-      cursor.SetPosition(hit.point);
-    }
-
-      // Debug.Log(EventSystem.current.IsPointerOverGameObject());
-      if ( !EventSystem.current.IsPointerOverGameObject()) { 
-        if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
-        {              
-          if (GameTerrain.GetComponent<Collider>().Raycast(ray, out hit, Mathf.Infinity))
+      RaycastHit hit;
+      Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+      if (GameTerrain.GetComponent<Collider>().Raycast(ray, out hit, Mathf.Infinity))
+      {
+        // Debug.Log(EventSystem.current.IsPointerOverGameObject());
+        if (!inputMan.OverUI())
+        {
+          if (Input.GetMouseButtonUp(0) || Input.GetMouseButtonUp(1))
           {
             AddBlip(hit.point);
             //SelectedUnit.transform.position = hit.point;
             foreach (Selectable t in Selection)
             {
-              if ( Input.GetMouseButtonUp(1))
+              if (Input.GetMouseButtonUp(1))
               {
                 t.Action();
-              }          
+              }
             }
-          }
-
-          if (Input.GetMouseButtonUp(0))
-          {
-            if (cursor.State == Types.SelectionState.Attack)
-            {
-              MoveSelection(hit.point);
-            }
-            if (cursor.State == Types.SelectionState.MoveTo)
-            {
-              MoveSelection(hit.point);
-            }
-          
           }
         }
       }
-    Bounds.SetUnits(Selection);
+    }
+
+    public void MoveCameraHome()
+    {
+      MainCamera.MoveTo(MyTeam.transform.position);
+    }
+
+    
+
+    // Update is called once per frame
+    void Update()
+    {
+
+      DoCamera();
+      CheckCursor();
+      CheckDrag();
+
+      
+
+      
+      Bounds.SetUnits(Selection);
+    }
   }
+
 }

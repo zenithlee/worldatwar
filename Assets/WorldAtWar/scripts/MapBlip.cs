@@ -7,7 +7,7 @@ public class MapBlip : MonoBehaviour {
 
   public void Kill()
   {
-    GameObject.Destroy(this.gameObject, 0.5f);
+    GameObject.Destroy(this.gameObject, 0.35f);
   }
 
 	// Use this for initialization

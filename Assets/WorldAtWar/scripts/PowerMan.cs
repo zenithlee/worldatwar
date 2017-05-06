@@ -3,43 +3,52 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PowerMan : MonoBehaviour {
+namespace WW
+{
 
-  public GameObject HealthBar;
-  public Team MyTeam;
-  public float TotalPowerRequired = 0;
-  public float TotalPowerAvailable = 0;
-
-
-  void CalculatePower()
+  public class PowerMan : MonoBehaviour
   {
-    Debug.Log("CalculatePower");
-    PowerStation[] pa = MyTeam.GetComponentsInChildren<PowerStation>();
-    TotalPowerAvailable = 0;
-    foreach ( PowerStation p in pa)
+
+    public GameObject HealthBar;
+    public Team MyTeam;
+    public float TotalPowerRequired = 0;
+    public float TotalPowerAvailable = 0;
+
+
+    void CalculatePower()
     {
-      TotalPowerAvailable += p.Power;
+     // Debug.Log("CalculatePower");
+      PowerStation[] pa = MyTeam.GetComponentsInChildren<PowerStation>();
+      TotalPowerAvailable = 0;
+      foreach (PowerStation p in pa)
+      {
+        TotalPowerAvailable += p.Power;
+      }
+
+      Building[] ba = MyTeam.GetComponentsInChildren<Building>();
+      TotalPowerRequired = 0;
+      foreach (Building b in ba)
+      {
+        TotalPowerRequired += b.PowerRequired;
+      }
+
+      Image m = HealthBar.GetComponent<Image>();
+      m.fillAmount = (float)TotalPowerAvailable / (float)TotalPowerRequired;
     }
 
-    Building[] ba = MyTeam.GetComponentsInChildren<Building>();
-    TotalPowerRequired = 0;
-    foreach ( Building b in ba)
+    // Use this for initialization
+    void Start()
     {
-      TotalPowerRequired += b.PowerRequired;
+      MyTeam = GetComponent<Game>().MyTeam;
+      InvokeRepeating("CalculatePower", 1, 1);
     }
 
-    Image m = HealthBar.GetComponent<Image>();
-    m.fillAmount = (float)TotalPowerAvailable / (float)TotalPowerRequired;
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
   }
 
-	// Use this for initialization
-	void Start () {
-    MyTeam = GetComponent<Game>().MyTeam;
-    InvokeRepeating("CalculatePower", 1,1);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+
 }

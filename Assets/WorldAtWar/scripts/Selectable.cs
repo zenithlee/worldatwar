@@ -5,85 +5,103 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.EventSystems;
 
-[Serializable]
-public class SelectableData
+namespace WW
 {
-  public Types.ConstructionTypes Type = Types.ConstructionTypes.Building;
-  public int Team = 0;
-}
 
-public class Selectable : MonoBehaviour {
-
-  public SelectableData Data = new SelectableData();
-
-  public bool IsPlacing = false;    
-  public Vector3 SnapSize = Vector3.one;  
-
-  void DoDie()
+  [Serializable]
+  public class SelectableData
   {
-    SendMessageUpwards("KillMe", this);
+    public Types.ConstructionTypes Type = Types.ConstructionTypes.Building;
+    public int Team = 0;
+    public float Cost = 100;
   }
 
-  void OnMouseUp()
+  public class Selectable : MonoBehaviour
   {
-   
-    if (!EventSystem.current.IsPointerOverGameObject())
+
+    public SelectableData Data = new SelectableData();
+
+    public bool IsPlacing = false;
+    public Vector3 SnapSize = Vector3.one;
+
+    void DoDie()
     {
-      SendMessageUpwards("DeselectAll");
-      Select();
+      SendMessageUpwards("KillMe", this, SendMessageOptions.DontRequireReceiver);
+    }
+
+    void OnMouseUp()
+    {
+
+      if (!EventSystem.current.IsPointerOverGameObject())
+      {
+        SendMessageUpwards("DeselectAll");
+        Select();
+      }
+    }
+
+    public float GetRadius()
+    {
+      NavMeshAgent nm = GetComponent<NavMeshAgent>();
+      if (nm != null)
+      {
+        return nm.radius;
+      }
+      else
+      {
+        BoxCollider bc = GetComponent<BoxCollider>();
+        return bc.bounds.extents.x;
+      }
+    }
+
+    public void Place()
+    {
+      IsPlacing = false;
+      SendMessage("DoPlace");
+    }
+
+    public void SetTarget(Vector3 v)
+    {
+      SendMessage("DoSetTarget", v);
+    }
+
+    public void MoveTo(Vector3 v)
+    {
+      SendMessage("DoMove", v);
+    }
+
+    public void Deselect()
+    {
+
+    }
+
+    public void Select()
+    {
+      SendMessageUpwards("SelectMe", this);
+      SendMessage("DoSelect");
+    }
+
+    public void Action()
+    {
+      SendMessage("DoAction");
+    }
+
+    // Use this for initialization
+    void Start()
+    {
+
+      BoxCollider b = GetComponent<BoxCollider>();
+      if (b != null)
+      {
+        this.SnapSize = b.size;
+      }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+      // Debug.Log(EventSystem.current.IsPointerOverGameObject());
     }
   }
 
-  public float GetRadius()
-  {
-    NavMeshAgent nm = GetComponent<NavMeshAgent>();
-    if ( nm != null ) {
-      return nm.radius;
-    }
-    else
-    {
-      BoxCollider bc = GetComponent<BoxCollider>();
-      return bc.bounds.extents.x;      
-    }    
-  }
 
-  public void Place()
-  {
-    IsPlacing = false;
-    SendMessage("DoPlace");
-  }
-
-  public void SetTarget(Vector3 v)
-  {
-    SendMessage("DoSetTarget", v);
-  }
-
-  public void MoveTo(Vector3 v) {
-    SendMessage("DoMove", v);
-  }
-
-  public void Deselect()
-  {
-    
-  }
-
-  public void Select()
-  {
-    SendMessageUpwards("SelectMe", this);    
-    SendMessage("DoSelect");
-  }
-
-  public void Action()
-  {
-    SendMessage("DoAction");
-  }
-
-  // Use this for initialization
-  void Start () {        
-  }
-	
-	// Update is called once per frame
-	void Update () {
-   // Debug.Log(EventSystem.current.IsPointerOverGameObject());
-  }
 }

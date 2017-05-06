@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
+namespace WW { 
+
 public class AudioMan : MonoBehaviour {
 
   public AudioMixerGroup MixerGroup;
@@ -46,4 +48,7 @@ public class AudioMan : MonoBehaviour {
     void Update () {
 		
 	}
+}
+
+
 }
