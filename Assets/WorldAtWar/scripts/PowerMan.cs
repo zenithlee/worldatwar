@@ -29,7 +29,7 @@ namespace WW
       TotalPowerRequired = 0;
       foreach (Building b in ba)
       {
-        TotalPowerRequired += b.PowerRequired;
+        TotalPowerRequired += b.Data.PowerRequired;
       }
 
       Image m = HealthBar.GetComponent<Image>();

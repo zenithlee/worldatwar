@@ -33,8 +33,7 @@ namespace WW
         GameObject go = Instantiate(proto, this.transform.position, this.transform.rotation);
         go.transform.parent = this.transform;
         Selectable sel = go.GetComponent<Selectable>();
-        sel.Data.Team = MyTeam.Data.Team;
-        go.GetComponent<Selectable>().Data.Team = MyTeam.Data.Team;
+        sel.Data.Team = MyTeam.Data.TeamID;        
         MyTeam.Data.Credits -= Limits.CostOf(sel.Data.Type);
         //send up to buildman
         SendMessageUpwards("PlaceMeNear", go);
@@ -56,13 +55,13 @@ namespace WW
       //Base
       if (Limits.CheckBuild(Types.ConstructionTypes.Base))
       {
-        Build(MyTeam.BaseProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Base));
         return;
       }
 
       if (Limits.CheckBuild(Types.ConstructionTypes.Barracks))
       {
-        Build(MyTeam.BarracksProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Barracks));
         return;
       }
 
@@ -70,18 +69,18 @@ namespace WW
       {
         if (Limits.CheckBuild(Types.ConstructionTypes.Assault))
         {
-          Build(MyTeam.AssaultProto);
+          Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Assault));
         }
 
         if (Limits.CheckBuild(Types.ConstructionTypes.Gunner))
         {
-          Build(MyTeam.GunnerProto);
+          Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Gunner));
         }
       }
 
       if (Limits.CheckBuild(Types.ConstructionTypes.VehicleFactory))
       {
-        Build(MyTeam.VehicleFactoryProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.VehicleFactory));
         return;
       }
 

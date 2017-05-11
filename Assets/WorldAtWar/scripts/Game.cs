@@ -15,11 +15,14 @@ namespace WW
   {
     [SerializeField]
     public float Version = 1.0f;
+    [SerializeField]
+    public int NumTeams = 2;
   }
 
   public class Game : MonoBehaviour
   {
-    GameData Data = new GameData();
+    public GameData Data = new GameData();
+
     public List<Selectable> Selection = new List<Selectable>();
     public GameObject GameTerrain;
     public GameObject MyArmy;
@@ -56,27 +59,22 @@ namespace WW
       GetComponent<UIMan>().SetSelection(Selection);
     }
 
-    void Save()
+    public void SaveGame()
     {
-      string GameName = "SavedGames" + "/SavedGame.dat";
-      Directory.CreateDirectory("SavedGames");
+      SaveLoad sl = GetComponent<SaveLoad>();
+      sl.Save();
+      
+    }
 
-      BinaryFormatter bf = new BinaryFormatter();
-      FileStream file = new FileStream(GameName, FileMode.Create);
+    public void LoadGame()
+    {
+      SaveLoad sl = GetComponent<SaveLoad>();
+      sl.Load();      
+    }
 
-      //save our data
-      bf.Serialize(file, Data);
-
-      Transform map = transform.Find("Map");
-      Team[] ta = map.GetComponentsInChildren<Team>();
-      //save each team data
-      foreach (Team t in ta)
-      {
-        bf.Serialize(file, t.Data);
-      }
-
-      file.Close();
-      Debug.Log("Saved:" + GameName);
+    public void Quit()
+    {
+      Application.Quit();
     }
 
     public void SelectAll()
@@ -92,16 +90,20 @@ namespace WW
       }
     }
 
-    public void SelectAssault()
+    public void SelectInfantry()
     {
       SelectByType(Types.ConstructionTypes.Assault);
-      SelectByType(Types.ConstructionTypes.Gunner);
-      SelectByType(Types.ConstructionTypes.Sniper);
+      SelectByType(Types.ConstructionTypes.Gunner, true);
+      SelectByType(Types.ConstructionTypes.Sniper, true);
     }
 
-    public void SelectTanks()
+    public void SelectVehicles()
     {
       SelectByType(Types.ConstructionTypes.Tank);
+      SelectByType(Types.ConstructionTypes.Jeep, true);
+      SelectByType(Types.ConstructionTypes.APC, true);
+      SelectByType(Types.ConstructionTypes.LargeTank, true);
+      SelectByType(Types.ConstructionTypes.SmallTank, true);
     }
 
     public void SelectJeeps()
@@ -109,9 +111,12 @@ namespace WW
       SelectByType(Types.ConstructionTypes.Jeep);
     }
 
-    public void SelectByType(Types.ConstructionTypes type)
+    public void SelectByType(Types.ConstructionTypes type, bool Add = false)
     {
-      DeselectAll();
+      if (Add == false)
+      {
+        DeselectAll();
+      }
       foreach (Selectable t in MyArmy.GetComponentsInChildren<Selectable>())
       {
         if (t.Data.Type == type)
@@ -129,21 +134,46 @@ namespace WW
         //t.GetComponent<Vehicle>().Deselect();
       }
       Selection.Clear();
+      SendMessage("DoDeselectAll");
     }
 
     void SelectMe(Selectable t)
     {
-      if (t.Data.Team == MyTeam.Data.Team)
+      if ( cursor.State == Types.SelectionState.None)
+      {
+        DeselectAll();
+      }
+
+      if ( cursor.State == Types.SelectionState.Attack)
+      {
+        Attack(t);
+      }
+
+      if (t.Data.Team == MyTeam.Data.TeamID)
       {
         Selection.Add(t);
         cursor.SetState(Types.SelectionState.MoveTo);
+      }
+      
+    }
+
+    void Attack( Selectable sel)
+    {
+      foreach (Selectable t in Selection)
+      {
+        Vehicle v = t.GetComponent<Vehicle>();
+        if ( v != null )
+        {
+          float r = sel.GetRadius();
+          v.DoSetTarget(sel.transform.position + new Vector3(UnityEngine.Random.value * r,0, UnityEngine.Random.value * r));
+        }
       }
     }
 
     void PlaceMe(GameObject go)
     {
       Selectable gs = go.GetComponent<Selectable>();
-      if (gs.Data.Team == MyTeam.Data.Team)
+      if (gs.Data.Team == MyTeam.Data.TeamID)
       {
         SelectMe(gs);
         cursor.SetState(Types.SelectionState.BuildAt);
@@ -305,14 +335,14 @@ namespace WW
 
         if (hit.transform == GameTerrain.transform)
         {
-          cursor.SetState(Types.SelectionState.MoveTo);
+          cursor.SetState(Types.SelectionState.None);
         }
         else
         {
           Selectable s = hit.transform.GetComponent<Selectable>();
           if (s != null)
           {
-            if (MyTeam.Data.Team != s.Data.Team)
+            if (MyTeam.Data.TeamID != s.Data.Team)
             {
               cursor.SetState(Types.SelectionState.Attack);
             }
@@ -355,8 +385,6 @@ namespace WW
       MainCamera.MoveTo(MyTeam.transform.position);
     }
 
-    
-
     // Update is called once per frame
     void Update()
     {
@@ -364,9 +392,6 @@ namespace WW
       DoCamera();
       CheckCursor();
       CheckDrag();
-
-      
-
       
       Bounds.SetUnits(Selection);
     }

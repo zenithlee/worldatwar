@@ -13,9 +13,11 @@ namespace WW
     public GameObject ConstructionPanel;
     public GameObject BasePanel;
     public GameObject MinePanel;
+    public GameObject ContextPanel;
 
     public List<Selectable> Selection;
     public Report Reporter;
+
 
     public void SetSelection(List<Selectable> nl)
     {
@@ -34,6 +36,10 @@ namespace WW
 
     void SelectMe(Selectable t)
     {
+      Game g = GetComponent<Game>();
+      if (t.Data.Team != g.MyTeam.Data.TeamID) return;
+
+
       if (t.IsPlacing == false)
       {
         if (t.Data.Type == Types.ConstructionTypes.Barracks)
@@ -55,12 +61,26 @@ namespace WW
       }
     }
 
+    void DoDeselectAll()
+    {
+      HideAllPanels();
+      ShowConstruction();
+    }
+
+
     public void HideAllPanels()
     {
       BarracksPanel.SetActive(false);
       VehicleFactoryPanel.SetActive(false);
       ConstructionPanel.SetActive(false);
       BasePanel.SetActive(false);
+      ContextPanel.SetActive(false);
+    }
+
+    public void ShowConstruction()
+    {
+      HideAllPanels();
+      ConstructionPanel.SetActive(true);
     }
 
     public void ShowBarracks()

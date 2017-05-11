@@ -5,8 +5,9 @@ using UnityEngine.EventSystems;
 
 public class InputMan : MonoBehaviour {
 
-  public enum INPUTSTATE { NONE, PANNING, SELECTING, MOVING, ATTACK }
-  public INPUTSTATE State = INPUTSTATE.NONE;
+  //public enum INPUTSTATE { NONE, PANNING, SELECTING, MOVING, ATTACK }
+  //public Types.SelectionState State = Types.SelectionState.PanView;
+  public Cursor cursor;
 
   public Vector3 mousePress;
   public Vector3 mouseRelease;
@@ -20,13 +21,7 @@ public class InputMan : MonoBehaviour {
     MainCam = GameObject.Find("Camera").GetComponent<CameraController>();
     GameTerrain = GameObject.FindGameObjectWithTag("Terrain");
 	}
-
-  void SetState(INPUTSTATE newState)
-  {
-    //Debug.Log(newState);
-    State = newState;
-  }
-
+ 
   /**
   * returns true if the mouse is over a UI element
   */
@@ -39,7 +34,7 @@ public class InputMan : MonoBehaviour {
   {
     if (Input.GetKeyUp(KeyCode.S))
     {
-      SendMessage("Save");
+      SendMessage("SaveGame");
     }
   }
 
@@ -76,7 +71,7 @@ public class InputMan : MonoBehaviour {
       }
 
 
-      if ( State == INPUTSTATE.NONE )
+      if ( cursor.State == Types.SelectionState.None )
       {
         RaycastHit hit = GetWorldClick();
         if (hit.transform != null)
@@ -85,16 +80,16 @@ public class InputMan : MonoBehaviour {
 
           if ((mouseDif.magnitude > 10) && (hit.transform == GameTerrain.transform))
           {
-            if (State == INPUTSTATE.NONE)
+            if (cursor.State == Types.SelectionState.None)
             {
-              SetState(INPUTSTATE.PANNING);
+              cursor.SetState(Types.SelectionState.PanView);
             }
           }
         }
       }
     }
 
-    if ( State == INPUTSTATE.PANNING )
+    if ( cursor.State == Types.SelectionState.PanView )
     {
       RaycastHit hit = GetWorldClick();
       if ( hit.transform != null ) {
@@ -119,7 +114,7 @@ public class InputMan : MonoBehaviour {
 
       if (OverUI())
       {
-        SetState(INPUTSTATE.NONE);
+        cursor.SetState(Types.SelectionState.None);
         return;
       }
 
@@ -137,18 +132,18 @@ public class InputMan : MonoBehaviour {
       {
         
       }
-      SetState( INPUTSTATE.NONE);
+      cursor.SetState( Types.SelectionState.None );
     }    
   }
 
   void CheckSelect()
   {
-
+   
   }
   
   void CheckMove()
   {       
-      if (State != InputMan.INPUTSTATE.PANNING)
+      if (cursor.State != Types.SelectionState.PanView)
       {
         SendMessage("MoveSelection", mouseRelease);
       }   

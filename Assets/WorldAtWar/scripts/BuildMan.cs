@@ -14,15 +14,34 @@ namespace WW
     public GameObject MyArmy;
     public LimitsMan Limits;
     public GameObject GameTerrain;
+    public Cursor cursor;
 
-    public void Build(GameObject proto)
+    //construct from serialized data
+    public void BuildFromData(List<object> data)
+    {
+      SelectableData sd = (SelectableData)data[0];      
+
+      Team aTeam = GetTeamByID(sd.Team);      
+      GameObject go = Instantiate(MyTeam.GetProtoByType(sd.Type ));
+      Selectable s = go.GetComponent<Selectable>();
+      s.Data = sd;
+      go.transform.parent = aTeam.transform;
+      go.transform.position = new Vector3(sd.x, sd.y, sd.z);
+      go.transform.rotation = Quaternion.Euler(sd.rx, sd.ry, sd.rz);
+    }
+
+    //regular build during gameplay
+    public GameObject Build(GameObject proto)
     {
       Selectable sel = proto.GetComponent<Selectable>();
+      sel.Data.Team = MyTeam.Data.TeamID;
       GameObject go = Instantiate(proto);
+      cursor.SetState(Types.SelectionState.BuildAt);
       SendMessage("PlaceMe", go);
 
       MyTeam.Data.Credits -= Limits.CostOf(sel.Data.Type);
       Limits.RegisterTransaction();
+      return go;
     }
 
     public void MarkerAt(Transform parent, Vector3 v)
@@ -32,10 +51,11 @@ namespace WW
       go.transform.position = v;
     }
 
+    // build from UI
     public void BuildBase()
     {
       if ( Limits.CheckBuild( Types.ConstructionTypes.Base)) {
-        Build(MyTeam.BaseProto);  
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Base));  
       }
     }
 
@@ -43,7 +63,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Mine))
       {
-        Build(MyTeam.MineProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Mine));
       }      
     }
 
@@ -51,7 +71,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Assault))
       {
-        Build(MyTeam.AssaultProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Assault));
       }     
     }
 
@@ -59,7 +79,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Gunner))
       {
-        Build(MyTeam.GunnerProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Gunner));
       }
     }
 
@@ -67,7 +87,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Sniper))
       {
-        Build(MyTeam.SniperProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Sniper));
       }
     }
 
@@ -75,7 +95,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Engineer))
       {
-        Build(MyTeam.EngineerProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Engineer));
       }
     }
 
@@ -83,7 +103,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Jeep))
       {
-        Build(MyTeam.JeepProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Jeep));
       }
     }
 
@@ -91,7 +111,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.PowerStation))
       {
-        Build(MyTeam.PowerStationProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.PowerStation));
       }
     }
 
@@ -99,7 +119,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Wall))
       {
-        Build(MyTeam.WallProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Wall));
       }
     }
 
@@ -107,7 +127,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Tank))
       {
-        Build(MyTeam.TankProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Tank));
       }
     }
 
@@ -115,7 +135,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Barracks))
       {
-        Build(MyTeam.BarracksProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Barracks));
       }
     }
 
@@ -123,7 +143,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.VehicleFactory))
       {
-        Build(MyTeam.VehicleFactoryProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.VehicleFactory));
       }
     }
 
@@ -131,7 +151,7 @@ namespace WW
     {
       if (Limits.CheckBuild(Types.ConstructionTypes.Container))
       {
-        Build(MyTeam.ContainerProto);
+        Build(MyTeam.GetProtoByType(Types.ConstructionTypes.Container));
       }
     }
 
@@ -140,7 +160,7 @@ namespace WW
       Team[] teams = GetComponentsInChildren<Team>();
       foreach (Team t in teams)
       {
-        if (t.Data.Team == id) return t;
+        if (t.Data.TeamID == id) return t;
       }
       return null;
     }
@@ -175,7 +195,7 @@ namespace WW
       Team team = GetTeamByID(gs.Data.Team);
       go.transform.parent = team.transform;
 
-      if (gs.Data.Team == MyTeam.Data.Team)
+      if (gs.Data.Team == MyTeam.Data.TeamID)
       {
         team.GetComponent<LimitsMan>().CheckBuild(gs.Data.Type);
       }
@@ -201,6 +221,8 @@ namespace WW
         }
 
       }
+
+      CreateRadarDot(go);
     }
 
     void CreateRadarDot(GameObject go)

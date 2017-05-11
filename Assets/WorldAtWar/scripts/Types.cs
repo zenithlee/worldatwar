@@ -13,7 +13,7 @@ public class Types {
     Ship, Warship, Boat, PatrolBoat, AttackBoat, Carrier,
     Flag, Marker, Beacon};
   public enum GameState { Loading, Menu, Playing };
-  public enum SelectionState { None, BuildAt, MoveTo, Attack }
+  public enum SelectionState { None, PanView, BuildAt, MoveTo, Attack }
 
   public Dictionary<ConstructionTypes, Object> TypeObjectMappings = new Dictionary<ConstructionTypes, Object>();
   

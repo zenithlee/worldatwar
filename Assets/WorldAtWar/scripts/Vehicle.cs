@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -6,13 +7,22 @@ using UnityEngine.AI;
 namespace WW
 {
 
+  [Serializable]
+  public class VehicleData
+  {
+    [SerializeField]
+    public float Speed = 10;
+  }
+
   public class Vehicle : MonoBehaviour
   {
+
+    public VehicleData Data = new VehicleData();
 
     public Vector3 Target;
     NavMeshAgent Agent;
     Animator ani;
-    public float Speed = 10;
+    
     public float AniSpeedMultiplier = 0.5f;
     public bool TurnBeforeMoving;
 
@@ -101,7 +111,7 @@ namespace WW
       if (ScoutTimer < 0)
       {
         ScoutTimer = ScoutTime;
-        Vector3 v = transform.position + new Vector3(Random.value * ScoutRadius - ScoutRadius / 2, 0, Random.value * ScoutRadius - ScoutRadius / 2);
+        Vector3 v = transform.position + new Vector3(UnityEngine.Random.value * ScoutRadius - ScoutRadius / 2, 0, UnityEngine.Random.value * ScoutRadius - ScoutRadius / 2);
         SendMessage("SetTarget", v);
       }
     }
@@ -246,7 +256,7 @@ namespace WW
           }
           else
           {
-            Agent.speed = Speed;
+            Agent.speed = Data.Speed;
           }
         }
 

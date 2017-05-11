@@ -11,9 +11,17 @@ namespace WW
   [Serializable]
   public class SelectableData
   {
+    [SerializeField]
     public Types.ConstructionTypes Type = Types.ConstructionTypes.Building;
+    [SerializeField]
     public int Team = 0;
+    [SerializeField]
     public float Cost = 100;
+
+    [SerializeField]
+    public float x,y,z = 0;    
+    [SerializeField]
+    public float rx,ry,rz = 0;
   }
 
   public class Selectable : MonoBehaviour
@@ -24,6 +32,18 @@ namespace WW
     public bool IsPlacing = false;
     public Vector3 SnapSize = Vector3.one;
 
+    public SelectableData Serialize()
+    {
+      Data.x = this.transform.position.x;
+      Data.y = this.transform.position.y;
+      Data.z = this.transform.position.z;
+      Vector3 r = this.transform.rotation.eulerAngles;
+      Data.rx = r.x;
+      Data.ry = r.y;
+      Data.rz = r.z;
+      return Data;
+    }
+
     void DoDie()
     {
       SendMessageUpwards("KillMe", this, SendMessageOptions.DontRequireReceiver);
@@ -31,12 +51,17 @@ namespace WW
 
     void OnMouseUp()
     {
-
       if (!EventSystem.current.IsPointerOverGameObject())
       {
-        SendMessageUpwards("DeselectAll");
+        //SendMessageUpwards("DeselectAll");
         Select();
       }
+    }
+
+    public void Select()
+    {
+      SendMessageUpwards("SelectMe", this);
+      SendMessage("DoSelect");
     }
 
     public float GetRadius()
@@ -49,8 +74,12 @@ namespace WW
       else
       {
         BoxCollider bc = GetComponent<BoxCollider>();
-        return bc.bounds.extents.x;
+        if (bc != null)
+        {
+          return bc.bounds.extents.x;
+        }
       }
+      return 1;
     }
 
     public void Place()
@@ -74,11 +103,7 @@ namespace WW
 
     }
 
-    public void Select()
-    {
-      SendMessageUpwards("SelectMe", this);
-      SendMessage("DoSelect");
-    }
+   
 
     public void Action()
     {

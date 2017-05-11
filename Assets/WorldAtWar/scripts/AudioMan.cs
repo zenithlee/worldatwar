@@ -30,7 +30,40 @@ public class AudioMan : MonoBehaviour {
     Units.outputAudioMixerGroup = MixerGroup;
 
     PlayMusic();
+      InvokeRepeating("CheckMusic", 5, 5);
   }
+
+    void CheckMusic()
+    {
+      Vehicle[] sels = GetComponentsInChildren<Vehicle>();
+      bool IsAttack = false;
+      foreach( Vehicle v in sels )
+      {
+        if ( v.State == Vehicle.States.Attack )
+        {
+          IsAttack = true;
+        }
+      }
+
+      if ( IsAttack == true )
+      {
+        if ( Music.clip != AttackMusic )
+        {
+          Music.clip = AttackMusic;
+          Music.Play();
+        }
+        
+      }
+      else
+      {
+        if (Music.clip != MainMusic)
+        {
+          Music.clip = MainMusic;
+          Music.Play();
+        }
+        
+      }
+    }
 
   void PlayMusic()
   {

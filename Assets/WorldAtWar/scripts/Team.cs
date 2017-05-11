@@ -13,7 +13,8 @@ namespace WW
   {
 
     [SerializeField]
-    public int Team = 0;
+    public int TeamID = 0;
+    [SerializeField]
     public float Credits = 0;
   }
 
@@ -23,28 +24,25 @@ namespace WW
     //public int TeamID = 0;
     public TeamData Data = new TeamData();
 
-    public GameObject BaseProto;
-    public GameObject BarracksProto;
-    public GameObject VehicleFactoryProto;
-    public GameObject WallProto;
-    public GameObject StorageProto;
-    public GameObject MineProto;
-    public GameObject PowerStationProto;
-    public GameObject ContainerProto;
-
-    public GameObject AssaultProto;
-    public GameObject GunnerProto;
-    public GameObject SniperProto;
-    public GameObject EngineerProto;
-
-    public GameObject JeepProto;
-    public GameObject TankProto;
+    public GameObject[] Prototypes;
 
     public GameObject Marker1Proto;
     public GameObject RadarDotBuildingProto;
     public GameObject RadarDotVehicleProto;
     public GameObject RadarDotInfantryProto;
 
+    public GameObject GetProtoByType(Types.ConstructionTypes type)
+    {
+      foreach (GameObject go in Prototypes)
+      {
+        Selectable s = go.GetComponent<Selectable>();
+        if ((s != null ) && (s.Data.Type == type))
+        {
+          return go;
+        }
+      }
+      return null;
+    }
 
     void AddAllToTeam()
     {
@@ -54,9 +52,27 @@ namespace WW
         Selectable s = t.GetComponent<Selectable>();
         if (s != null)
         {
-          s.Data.Team = Data.Team;
+          s.Data.Team = Data.TeamID;
         }
       }
+
+      foreach (GameObject go in Prototypes)
+      {
+        Selectable s = go.GetComponent<Selectable>();
+        if (s != null )
+        {
+          s.Data.Team = Data.TeamID;
+        }
+      }
+    }
+
+    public void Clear()
+    {
+      while ( transform.childCount> 0 )
+      {
+        GameObject.Destroy(transform.GetChild(0).gameObject);
+        transform.GetChild(0).parent = null;       
+      }      
     }
 
     public void RepairUnit(Selectable s)

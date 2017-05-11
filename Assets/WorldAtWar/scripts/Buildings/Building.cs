@@ -1,10 +1,18 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[Serializable]
+public class BuildingData
+{
+  [SerializeField]
+  public float PowerRequired = 1;
+}
+
 public class Building : MonoBehaviour {
 
-  public float PowerRequired = 1;
+  public BuildingData Data = new BuildingData();
 
  public void DoPlace()
   {

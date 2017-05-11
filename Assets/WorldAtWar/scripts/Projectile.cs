@@ -16,7 +16,7 @@ public class Projectile : MonoBehaviour
   public void OnCollisionEnter(Collision c)
   {
     //Selectable s = c.gameObject;    
-    Debug.Log(c);
+    //Debug.Log(c);
     Instantiate(MyExplosion, transform.position, Quaternion.identity);
     GameObject.Destroy(this.gameObject, 0.5f);
   }

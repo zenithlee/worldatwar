@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Cursor : MonoBehaviour {
 
-  public Types.SelectionState State = Types.SelectionState.BuildAt;
+  public Types.SelectionState State = Types.SelectionState.None;
 
   public GameObject PointerCursor;
   public GameObject BuildCursor;
